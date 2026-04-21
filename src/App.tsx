@@ -632,10 +632,22 @@ function App() {
                    <input
                     autoFocus
                     required
-                    type="number"
+                    type="text"
                     step="0.01"
                     value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      if (raw === '') {
+                        setAmount('');
+                        return;
+                      }
+                      let cleaned = raw.replace(/[^0-9.]/g, '');
+                      const parts = cleaned.split('.');
+                      if (parts.length > 2) {
+                        cleaned = parts[0] + '.' + parts.slice(1).join('');
+                      }
+                      setAmount(cleaned);
+                    }}
                     className="w-full text-7xl font-black px-2 py-4 border-b-8 border-slate-100 dark:border-slate-800 bg-transparent text-slate-900 dark:text-white focus:border-emerald-500 outline-none transition-all placeholder-slate-200 dark:placeholder-slate-800"
                     placeholder="0"
                   />
