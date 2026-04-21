@@ -14,6 +14,15 @@ import {
 
 export type TransactionType = 'income' | 'expense';
 
+export type Currency = 'RUB' | 'USD' | 'EUR' | 'KZT';
+
+export const CURRENCY_SYMBOLS: Record<Currency, string> = {
+  RUB: '₽',
+  USD: '$',
+  EUR: '€',
+  KZT: '₸'
+};
+
 export interface Category {
   id: string;
   name: string;
@@ -29,6 +38,7 @@ export interface Transaction {
   type: TransactionType;
   date: string;
   comment: string;
+  isRecurring?: boolean;
 }
 
 export interface Budget {
