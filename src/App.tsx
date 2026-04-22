@@ -57,6 +57,21 @@ function App() {
     }
   }, [isDarkMode]);
 
+  // Auto-detect system preference for first run (if user hasn't set a preference)
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('dark-mode');
+      if (stored == null) {
+        const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)')?.matches;
+        if (prefersDark) {
+          setIsDarkMode(true);
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
   // Automatic Recurring Payments Logic
   useEffect(() => {
     const today = new Date();
@@ -527,16 +542,22 @@ function App() {
                   <label className="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-5 ml-1">
                     Месячный бюджет (лимит)
                   </label>
-                  <div className="relative">
+                  <div className="flex flex-col sm:flex-row items-center gap-3">
                     <input
-                      type="number"
+                      type="text"
                       value={budget}
-                      onChange={(e) => setBudget(Number(e.target.value))}
-                      className="w-full px-8 py-6 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 focus:border-emerald-500 outline-none transition-all text-3xl font-black dark:text-white shadow-sm"
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        if (raw === '') { setBudget(''); return; }
+                        let cleaned = raw.replace(/[^0-9.]/g, '');
+                        const parts = cleaned.split('.');
+                        if (parts.length > 2) cleaned = parts[0] + '.' + parts.slice(1).join('');
+                        setBudget(cleaned);
+                      }}
+                      className="flex-1 px-8 py-6 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 focus:border-emerald-500 outline-none transition-all text-3xl font-black"
+                      placeholder="0"
                     />
-                    <div className="absolute right-8 top-1/2 -translate-y-1/2 text-emerald-500 font-black text-2xl">
-                      {CURRENCY_SYMBOLS[currency]}
-                    </div>
+                    <span className="text-2xl font-black text-emerald-500" aria-label="currency-symbol">{CURRENCY_SYMBOLS[currency]}</span>
                   </div>
                 </div>
 
@@ -594,8 +615,8 @@ function App() {
 
       {/* Add Transaction Modal */}
       {isFormOpen && (
-        <div className="fixed inset-0 bg-slate-900/80 flex items-center justify-center z-50 p-4 backdrop-blur-xl animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-xl rounded-[3.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-20 duration-500 border-4 border-slate-100 dark:border-slate-800">
+      <div className="fixed inset-0 bg-slate-900/80 flex items-center justify-center z-50 p-4 backdrop-blur-xl animate-in fade-in duration-300">
+        <div className="bg-white dark:bg-slate-900 w-full max-w-xl rounded-[3.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-20 duration-500 border-4 border-slate-100 dark:border-slate-800" style={{ maxHeight: '85vh' }}>
             <div className="p-10 pb-6 flex justify-between items-center">
               <div>
                 <h3 className="text-3xl font-black text-slate-900 dark:text-white">Новая операция</h3>
